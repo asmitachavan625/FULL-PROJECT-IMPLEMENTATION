@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nykaa Style Shopping Page</title>
+<style>
+  /* Reset */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #000000;
+    color: #333;
+  }
+  header {
+    background: #FADADD	;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #002aff; /* Nykaa pink */
+  }
+
+  /* Search bar */
+  .search-bar {
+    flex: 1;
+    max-width: 400px;
+    margin: 0 1rem;
+    position: relative;
+  }
+  .search-bar input {
+    width: 100%;
+    padding: 0.5rem 2.5rem 0.5rem 0.8rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+  }
+  .search-bar input:focus {
+    border-color: #2a00fb;
+    outline: none;
+  }
+  .search-bar svg {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    fill: #aaa;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+  }
+
+  /* Main container */
+  .main-container {
+    display: flex;
+    padding: 1rem 1.5rem;
+    gap: 1rem;
+    max-width: 1200px;
+    margin: 1rem auto;
+  }
+
+  /* Sidebar - Filters */
+  .sidebar {
+    background:  #FADADD ;
+    padding: 1rem;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+    width: 260px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .filter-header {
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .filter-toggle {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    display: none; /* shown on mobile */
+  }
+  .filter-section {
+    margin-bottom: 1.2rem;
+  }
+  .filter-section h3 {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .filter-section label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.4rem;
+    cursor: pointer;
+  }
+  .filter-section input[type="checkbox"] {
+    margin-right: 0.6rem;
+  }
+  /* Price range slider */
+  .price-range {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .price-range input[type=range] {
+    width: 100%;
+  }
+  .price-values {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  /* Products Grid */
+  .products {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+    gap: 1rem;
+  }
+  .product-card {
+    background: #ebc4df;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.3s ease;
+  }
+  .product-card:hover {
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
+  }
+  .product-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: contain;
+    border-radius: 6px;
+    margin-bottom: 0.7rem;
+  }
+  .product-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .product-name {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    font-size: 1rem;
+  }
+  .product-price {
+    color: #1e00ff;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+  .product-actions {
+    display: flex;
+    gap: 0.6rem;
+  }
+  button {
+    flex: 1;
+    padding: 0.5rem 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+  }
+  button.add-wishlist {
+    background: #fce4ec;
+    color: #5741ec;
+  }
+  button.add-wishlist:hover {
+    background: #f8bbd0;
+  }
+  button.add-cart {
+    background: #4a1ae8;
+    color: white;
+  }
+  button.add-cart:hover {
+    background: #3300ff;
+  }
+
+  /* Wishlist & Cart Sidebars */
+.wishlist-sidebar,
+.cart-sidebar {
+  position: fixed;
+  top: 0;
+  right: -320px; /* hidden by default */
+  width: 320px;
+  height: 100vh;
+  background: #fff;
+  box-shadow: -4px 0 10px rgba(0,0,0,0.15);
+  overflow-y: auto;
+  padding: 20px;
+  transition: right 0.3s ease-in-out;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+}
+
+.wishlist-sidebar.open,
+.cart-sidebar.open {
+  right: 0;
+}
+
+/* Header */
+.wishlist-sidebar h2,
+.cart-sidebar h2 {
+  margin: 0 0 20px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #222;
+  border-bottom: 2px solid #ffffff; /* brand accent */
+  padding-bottom: 8px;
+}
+
+/* Close buttons */
+.close-wishlist-btn,
+.close-cart-btn {
+  align-self: flex-end;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #888;
+  margin-bottom: 10px;
+  transition: color 0.2s;
+}
+
+.close-wishlist-btn:hover,
+.close-cart-btn:hover {
+  color: #001aff;
+}
+
+/* List items */
+.wishlist-sidebar .list-item,
+.cart-sidebar .list-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 12px;
+}
+
+.list-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-right: 15px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Item info */
+.item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.item-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px;
+  line-height: 1.2;
+}
+
+.item-price {
+  font-size: 0.9rem;
+  color: #888;
+  margin: 0 0 8px;
+}
+
+/* Action buttons inside wishlist/cart */
+.item-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.item-actions button {
+  background: #1120ed;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  flex-shrink: 0;
+}
+
+.item-actions button:hover {
+  background: #3700ff;
+}
+
+/* Remove buttons are red tinted */
+.item-actions button.remove-btn {
+  background: #1100ff;
+}
+
+.item-actions button.remove-btn:hover {
+  background: #4000ff;
+}
+
+/* Empty state message */
+.wishlist-sidebar p,
+.cart-sidebar p {
+  font-size: 1rem;
+  color: #666;
+  text-align: center;
+  margin-top: 30px;
+  font-style: italic;
+}
+
+/* Scrollbar styling for sidebars */
+.wishlist-sidebar::-webkit-scrollbar,
+.cart-sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.wishlist-sidebar::-webkit-scrollbar-thumb,
+.cart-sidebar::-webkit-scrollbar-thumb {
+  background-color: #0004ff;
+  border-radius: 10px;
+}
+
+
+  /* Wishlist & Cart Sidebar */
+  .sidebar-right {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 320px;
+    height: 100vh;
+    background: white;
+    box-shadow: -4px 0 12px rgb(0 0 0 / 0.2);
+    padding: 1rem;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    z-index: 110;
+  }
+  .sidebar-right.open {
+    transform: translateX(0);
+  }
+  .sidebar-right h2 {
+    margin-top: 0;
+    font-weight: 700;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.5rem;
+  }
+.sidebar-close {
+  align-self: flex-end;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #000000;
+  margin-bottom: 1rem; /* reduce vertical space */
+  padding: 0;
+  line-height: 1;       /* tighten vertical space */
+  height: 1rem;       /* optional: fix height */
+  width: 1rem;        /* optional: fix width */
+}
+
+  .list-item {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+  }
+  .list-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: #f9f9f9;
+  }
+  .item-info {
+    flex: 1;
+  }
+  .item-name {
+    font-weight: 600;
+    margin: 0 0 0.3rem 0;
+  }
+  .item-price {
+    color: #0022ff;
+    font-weight: 700;
+  }
+  .item-actions {
+    display: flex;
+    gap: 0.4rem;
+  }
+  .item-actions button {
+    padding: 0.3rem 0.6rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    border-radius: 4px;
+  }
+  .remove-btn {
+    background: #001eff;
+    color: white;
+  }
+  .remove-btn:hover {
+    background: #4c00ff;
+  }
+  .buy-btn {
+    background: #4caf50;
+    color: white;
+  }
+  .buy-btn:hover {
+    background: #2e7d32;
+  }
+
+  /* Header buttons */
+  .header-buttons {
+    display: flex;
+    gap: 1rem;
+  }
+  .header-buttons button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    font-size: 1.4rem;
+    color: #ff006a;
+  }
+  .header-buttons button:focus {
+    outline: 2px solid #f70375;
+    outline-offset: 2px;
+  }
+  .header-buttons .badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #2b00ff;
+    color: rgb(255, 255, 255);
+    border-radius: 50%;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .main-container {
+      flex-direction: column;
+      padding: 0.5rem 1rem;
+    }
+    .sidebar {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      box-shadow: none;
+      border-radius: 0;
+    }
+    .products {
+      grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+    }
+  }
+
+  /* Mobile: Filter toggle */
+  @media (max-width: 700px) {
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      max-width: 280px;
+      transform: translateX(-110%);
+      transition: transform 0.3s ease;
+      box-shadow: 4px 0 12px rgb(0 0 0 / 0.25);
+      z-index: 120;
+    }
+    .sidebar.open {
+      transform: translateX(0);
+    }
+    .filter-toggle {
+      display: block;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>MY SHOP</h1>
+
+  <button class="filter-toggle" aria-label="Toggle Filters" id="filterToggle">☰</button>
+
+  <div class="search-bar">
+    <input type="search" id="searchInput" placeholder="Search products..." aria-label="Search products" />
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 21l-4.35-4.35m1.45-5.65a7 7 0 11-14 0 7 7 0 0114 0z" stroke="#aaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+  </div>
+
+  <div class="header-buttons">
+    <button aria-label="Open Wishlist" id="openWishlistBtn">🤍<span class="badge" id="wishlistCount">0</span></button>
+    <button aria-label="Open Cart" id="openCartBtn">🛒<span class="badge" id="cartCount">0</span></button>
+  </div>
+</header>
+
+<div class="main-container">
+  <aside class="sidebar" id="sidebarFilters" aria-label="Product Filters">
+    <div class="filter-header">
+      <span>Filters</span>
+      <button class="filter-toggle" aria-label="Close Filters" id="filterCloseBtn" style="display:none;">✕</button>
+    </div>
+
+    <section class="filter-section" aria-labelledby="categoryFilterTitle">
+      <h3 id="categoryFilterTitle">Category</h3>
+      <label><input type="checkbox" value="skincare" class="category-filter" /> Skincare</label>
+      <label><input type="checkbox" value="haircare" class="category-filter" /> Haircare</label>
+      <label><input type="checkbox" value="makeup" class="category-filter" /> Makeup</label>
+      <label><input type="checkbox" value="fragrance" class="category-filter" /> Fragrance</label>
+      <label><input type="checkbox" value="accessories" class="category-filter" /> Accessories</label>
+    </section>
+
+    <section class="filter-section" aria-labelledby="priceFilterTitle">
+      <h3 id="priceFilterTitle">Price Range (₹)</h3>
+      <div class="price-range">
+        <input type="range" id="priceMin" min="0" max="5000" step="100" value="0" />
+        <input type="range" id="priceMax" min="0" max="5000" step="100" value="5000" />
+      </div>
+      <div class="price-values">
+        <span id="priceMinValue">₹0</span>
+        <span id="priceMaxValue">₹5000+</span>
+      </div>
+    </section>
+  </aside>
+
+  <main class="products" id="productsContainer" aria-live="polite" aria-label="Product List">
+    <!-- Products inserted here by JS -->
+  </main>
+</div>
+
+<!-- Wishlist Sidebar -->
+<aside class="sidebar-right" id="wishlistSidebar" aria-label="Wishlist" aria-hidden="true">
+  <button class="sidebar-close" aria-label="Close Wishlist" id="closeWishlistBtn">✕</button>
+  <h2>Your Wishlist</h2>
+  <div id="wishlistItems">
+    <!-- Wishlist items inserted here -->
+  </div>
+</aside>
+
+<!-- Cart Sidebar -->
+<aside class="sidebar-right" id="cartSidebar" aria-label="Shopping Cart" aria-hidden="true">
+  <button class="sidebar-close" aria-label="Close Cart" id="closeCartBtn">✕</button>
+  <h2>Your Cart</h2>
+  <div id="cartItems">
+    <!-- Cart items inserted here -->
+  </div>
+</aside>
+
+<script>
+  // Sample product data
+  const products = [
+ 
+  // Skincare
+  { id: 1, name: "Mamaearth Vitamin C Serum", category: "skincare", price: 799, img: "product images/mamaerth serum" },
+  { id: 2, name: "Biotique Bio Cucumber Pore Tightening Toner", category: "skincare", price: 249, img: "product images/toner" },
+  { id: 3, name: "Plum Green Tea Face Wash", category: "skincare", price: 299, img: "product images/fashwash" },
+  { id: 4, name: "The Derma Co 10% Niacinamide Face Serum", category: "skincare", price: 699, img: "product images/derma serum" },
+  { id: 5, name: "Dot & Key Sunscreen SPF 50", category: "skincare", price: 595, img: "product images/sunscreen" },
+
+  // Haircare
+  { id: 6, name: "L'Oreal Paris Total Repair Shampoo", category: "haircare", price: 299, img: "product images/shampoo" },
+  { id: 7, name: "WOW Apple Cider Vinegar Hair Mask", category: "haircare", price: 499, img: "product images/hair mask" },
+  { id: 8, name: "Dove Intense Repair Conditioner", category: "haircare", price: 250, img: "product images/conditioner" },
+  { id: 9, name: "Tresemme Keratin Smooth Hair Serum", category: "haircare", price: 450, img: "product images/t serum" },
+  { id: 10, name: "St. Botanica Moroccan Argan Oil", category: "haircare", price: 699, img: "product images/hairoil" },
+
+  // Makeup
+  { id: 11, name: "Lakmé 9 to 5 Primer + Matte Lip Color", category: "makeup", price: 350, img: "product images/lipcolor" },
+  { id: 12, name: "Maybelline Fit Me Foundation", category: "makeup", price: 549, img: "product images/foundation" },
+  { id: 13, name: "Nykaa Stay Matte Liquid Lipstick", category: "makeup", price: 499, img: "product images/matelipstick" },
+  { id: 14, name: "L’Oreal Paris Kajal Magique", category: "makeup", price: 275, img: "product images/kajal" },
+  { id: 15, name: "Colorbar Perfect Match Foundation", category: "makeup", price: 750, img: "product images/colorbar" },
+
+  // Fashion
+  { id: 16, name: "Printed Cotton Kurti", category: "fashion", price: 1299, img: "product images/kurti" },
+  { id: 17, name: "womwn's Casual Denim Jacket", category: "fashion", price: 1999, img: "product images/denim" },
+  { id: 18, name: "Floral Maxi Dress", category: "fashion", price: 1599, img: "product images/maxi dress" },
+  { id: 19, name: "womens cords set ", category: "fashion", price: 1299, img: "product images/cords" },
+  { id: 20, name: "Women’s White Shirt", category: "fashion", price: 999, img: "product images/white shirt" },
+
+  // Accessories
+  { id: 21, name: "Silk Scarf", category: "accessories", price: 799, img: "product images/scarf" },
+  { id: 22, name: "Leather Wallet", category: "accessories", price: 1200, img: "product images/wallets" },
+  { id: 23, name: "Classic Sunglasses", category: "accessories", price: 1500, img: "product images/sunglass.webp" },
+  { id: 24, name: "Gold Plated Earrings", category: "accessories", price: 1799, img: "product images/earrings" },
+  { id: 25, name: "Stylish Wristwatch", category: "accessories", price: 3499, img: "product images/watch" }
+];
+
+
+
+
+  // DOM refs
+  const productsContainer = document.getElementById('productsContainer');
+  const wishlistSidebar = document.getElementById('wishlistSidebar');
+  const wishlistItemsContainer = document.getElementById('wishlistItems');
+  const cartSidebar = document.getElementById('cartSidebar');
+  const cartItemsContainer = document.getElementById('cartItems');
+
+  const wishlistCount = document.getElementById('wishlistCount');
+  const cartCount = document.getElementById('cartCount');
+
+  const openWishlistBtn = document.getElementById('openWishlistBtn');
+  const closeWishlistBtn = document.getElementById('closeWishlistBtn');
+
+  const openCartBtn = document.getElementById('openCartBtn');
+  const closeCartBtn = document.getElementById('closeCartBtn');
+
+  const filterToggleBtn = document.getElementById('filterToggle');
+  const filterCloseBtn = document.getElementById('filterCloseBtn');
+  const sidebarFilters = document.getElementById('sidebarFilters');
+
+  const searchInput = document.getElementById('searchInput');
+  const categoryFilters = document.querySelectorAll('.category-filter');
+  const priceMinInput = document.getElementById('priceMin');
+  const priceMaxInput = document.getElementById('priceMax');
+  const priceMinValue = document.getElementById('priceMinValue');
+  const priceMaxValue = document.getElementById('priceMaxValue');
+
+  // State
+  let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+  // Helper: Save to localStorage
+  function saveState() {
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }
+
+  // Update badge counts
+  function updateCounts() {
+    wishlistCount.textContent = wishlist.length;
+    cartCount.textContent = cart.reduce((acc, item) => acc + item.qty, 0);
+  }
+
+  // Render products filtered
+  function renderProducts() {
+    const searchTerm = searchInput.value.trim().toLowerCase();
+    const selectedCategories = Array.from(categoryFilters)
+      .filter(c => c.checked)
+      .map(c => c.value);
+    const minPrice = parseInt(priceMinInput.value, 10);
+    const maxPrice = parseInt(priceMaxInput.value, 10);
+
+    let filtered = products.filter(product => {
+      // Search filter
+      if (searchTerm && !product.name.toLowerCase().includes(searchTerm)) {
+        return false;
+      }
+      // Category filter
+      if (selectedCategories.length && !selectedCategories.includes(product.category)) {
+        return false;
+      }
+      // Price filter
+      if (product.price < minPrice || product.price > maxPrice) {
+        return false;
+      }
+      return true;
+    });
+
+    productsContainer.innerHTML = filtered.map(p => {
+      const inWishlist = wishlist.find(w => w.id === p.id);
+      return `
+        <article class="product-card" tabindex="0" aria-label="${p.name}, Price ₹${p.price}">
+          <img src="${p.img}" alt="${p.name}" loading="lazy" />
+          <div class="product-info">
+            <h3 class="product-name">${p.name}</h3>
+            <p class="product-price">₹${p.price}</p>
+            <div class="product-actions">
+              <button class="add-wishlist" aria-pressed="${!!inWishlist}" aria-label="${inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}" data-id="${p.id}">
+                ${inWishlist ? '♥ Remove' : '♡ Wishlist'}
+              </button>
+              <button class="add-cart" aria-label="Add to cart" data-id="${p.id}">Add to Cart</button>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join('');
+  }
+
+  // Render Wishlist
+  function renderWishlist() {
+    if (wishlist.length === 0) {
+      wishlistItemsContainer.innerHTML = `<p>Your wishlist is empty.</p>`;
+      return;
+    }
+    wishlistItemsContainer.innerHTML = wishlist.map(item => {
+      return `
+        <div class="list-item" tabindex="0">
+          <img src="${item.img}" alt="${item.name}" />
+          <div class="item-info">
+            <p class="item-name">${item.name}</p>
+            <p class="item-price">₹${item.price}</p>
+            <div class="item-actions">
+              <button class="remove-btn" aria-label="Remove ${item.name} from wishlist" data-id="${item.id}">Remove</button>
+              <button class="buy-btn" aria-label="Add ${item.name} to cart" data-id="${item.id}">Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Render Cart
+  function renderCart() {
+    if (cart.length === 0) {
+      cartItemsContainer.innerHTML = `<p>Your cart is empty.</p>`;
+      return;
+    }
+    cartItemsContainer.innerHTML = cart.map(item => {
+      return `
+        <div class="list-item" tabindex="0">
+          <img src="${item.img}" alt="${item.name}" />
+          <div class="item-info">
+            <p class="item-name">${item.name}</p>
+            <p class="item-price">₹${item.price} x ${item.qty} = ₹${item.price * item.qty}</p>
+            <div class="item-actions">
+              <button class="remove-btn" aria-label="Remove ${item.name} from cart" data-id="${item.id}">Remove</button>
+              <button class="buy-btn" aria-label="Buy ${item.name}" data-id="${item.id}">Buy Now</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Add or remove from wishlist
+  function toggleWishlist(id) {
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+    const exists = wishlist.find(w => w.id === id);
+    if (exists) {
+      wishlist = wishlist.filter(w => w.id !== id);
+    } else {
+      wishlist.push(product);
+    }
+    saveState();
+    updateCounts();
+    renderProducts();
+    renderWishlist();
+  }
+
+  // Add to cart
+  function addToCart(id) {
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+    const inCart = cart.find(c => c.id === id);
+    if (inCart) {
+      inCart.qty += 1;
+    } else {
+      cart.push({...product, qty: 1});
+    }
+    saveState();
+    updateCounts();
+    renderCart();
+  }
+
+  // Remove from wishlist
+  function removeFromWishlist(id) {
+    wishlist = wishlist.filter(w => w.id !== id);
+    saveState();
+    updateCounts();
+    renderProducts();
+    renderWishlist();
+  }
+
+  // Remove from cart
+  function removeFromCart(id) {
+    cart = cart.filter(c => c.id !== id);
+    saveState();
+    updateCounts();
+    renderCart();
+  }
+
+  // Buy product (just alert)
+  function buyProduct(id) {
+    const product = cart.find(c => c.id === id);
+    if (!product) return;
+    alert(`Thank you for buying ${product.name} for ₹${product.price * product.qty}!`);
+    cart = cart.filter(c => c.id !== id);
+    saveState();
+    updateCounts();
+    renderCart();
+  }
+
+  // Event delegation for product cards
+  productsContainer.addEventListener('click', e => {
+    if (e.target.matches('button.add-wishlist')) {
+      const id = +e.target.dataset.id;
+      toggleWishlist(id);
+    }
+    if (e.target.matches('button.add-cart')) {
+      const id = +e.target.dataset.id;
+      addToCart(id);
+    }
+  });
+
+  // Event delegation for wishlist
+  wishlistItemsContainer.addEventListener('click', e => {
+    if (e.target.matches('button.remove-btn')) {
+      const id = +e.target.dataset.id;
+      removeFromWishlist(id);
+    }
+    if (e.target.matches('button.buy-btn')) {
+      const id = +e.target.dataset.id;
+      addToCart(id);
+      removeFromWishlist(id);
+    }
+  });
+
+  // Event delegation for cart
+  cartItemsContainer.addEventListener('click', e => {
+    if (e.target.matches('button.remove-btn')) {
+      const id = +e.target.dataset.id;
+      removeFromCart(id);
+    }
+    if (e.target.matches('button.buy-btn')) {
+      const id = +e.target.dataset.id;
+      buyProduct(id);
+    }
+  });
+
+  // Wishlist sidebar open/close
+  openWishlistBtn.addEventListener('click', () => {
+    wishlistSidebar.classList.add('open');
+    wishlistSidebar.setAttribute('aria-hidden', 'false');
+  });
+  closeWishlistBtn.addEventListener('click', () => {
+    wishlistSidebar.classList.remove('open');
+    wishlistSidebar.setAttribute('aria-hidden', 'true');
+  });
+
+  // Cart sidebar open/close
+  openCartBtn.addEventListener('click', () => {
+    cartSidebar.classList.add('open');
+    cartSidebar.setAttribute('aria-hidden', 'false');
+  });
+  closeCartBtn.addEventListener('click', () => {
+    cartSidebar.classList.remove('open');
+    cartSidebar.setAttribute('aria-hidden', 'true');
+  });
+
+  // Filter toggle on mobile
+  filterToggleBtn.addEventListener('click', () => {
+    sidebarFilters.classList.add('open');
+    filterToggleBtn.style.display = 'none';
+    filterCloseBtn.style.display = 'inline-block';
+  });
+  filterCloseBtn.addEventListener('click', () => {
+    sidebarFilters.classList.remove('open');
+    filterToggleBtn.style.display = 'inline-block';
+    filterCloseBtn.style.display = 'none';
+  });
+
+  // Search input
+  searchInput.addEventListener('input', renderProducts);
+
+  // Category filters
+  categoryFilters.forEach(checkbox => {
+    checkbox.addEventListener('change', renderProducts);
+  });
+
+  // Price sliders logic
+  function updatePriceValues() {
+    let min = parseInt(priceMinInput.value, 10);
+    let max = parseInt(priceMaxInput.value, 10);
+    if (min > max) {
+      if (this === priceMinInput) {
+        priceMaxInput.value = min;
+        max = min;
+      } else {
+        priceMinInput.value = max;
+        min = max;
+      }
+    }
+    priceMinValue.textContent = `₹${min}`;
+    priceMaxValue.textContent = max >= 5000 ? `₹${max}+` : `₹${max}`;
+    renderProducts();
+  }
+  priceMinInput.addEventListener('input', updatePriceValues);
+  priceMaxInput.addEventListener('input', updatePriceValues);
+
+  // Initial render
+  updateCounts();
+  renderProducts();
+  renderWishlist();
+  renderCart();
+</script>
+
+</body>
+</html>
